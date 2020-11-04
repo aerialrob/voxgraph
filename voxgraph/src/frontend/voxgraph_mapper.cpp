@@ -489,7 +489,7 @@ void VoxgraphMapper::switchToNewSubmap(const ros::Time& current_timestamp) {
     // Compute the relative odom from previous submap S1 to current submap S2
     const Transformation T_B_S2 = map_tracker_.get_T_S_B().inverse();
     const Transformation T_S1_S2 = T_S1_B * T_B_S2;
-    std::cout << "T_S1_S2: " << T_S1_S2 << std::endl;
+    //std::cout << "T_S1_S2: " << T_S1_S2 << std::endl;
 
     // Add the constraint to the pose graph
     pose_graph_interface_.addOdometryMeasurement(
@@ -548,9 +548,13 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
         current_timestamp);
   }
 
-  // Publish the submap collection
+  // Publish the submap collection - TSDF
   projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
-                                            current_timestamp);
+                                            current_timestamp, true);
+  
+  // Publish the submap collection - ESDF
+  projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
+                                            current_timestamp, false);
 
   // Publish the submap poses
   submap_server_.publishSubmapPoses(submap_collection_ptr_, current_timestamp);

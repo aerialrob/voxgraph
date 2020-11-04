@@ -16,9 +16,9 @@
        doc="Automatically launch Rviz." />
 
   <!-- Play the rosbag, unless no path is specified -->
-  <node unless="$(eval arg('rosbag_path') is '')"
+  <!-- <node unless="$(eval arg('rosbag_path') is '')"
         name="player" pkg="rosbag" type="play" output="screen"
-        args="-r 1.0 -s $(arg rosbag_skip_first_n_sec) -q --clock $(arg rosbag_path)" />
+        args="-r 1.0 -s $(arg rosbag_skip_first_n_sec) -q -clock $(arg rosbag_path)" /> -->
 
   <!-- Run voxgraph -->
   <group>
@@ -27,7 +27,7 @@
 
     <node name="voxgraph_mapper" pkg="voxgraph" type="voxgraph_mapping_node"
           output="screen" launch-prefix="$(arg launch_prefix)">
-      <rosparam file="$(find voxgraph)/config/voxgraph_mapper.yaml" />
+      <rosparam file="$(find voxgraph)/config/voxgraph_mapper_test.yaml" />
       <param name="pointcloud_topic" value="$(arg pointcloud_topic)" />
     </node>
   </group>
