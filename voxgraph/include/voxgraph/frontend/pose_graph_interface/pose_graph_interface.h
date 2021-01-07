@@ -42,7 +42,8 @@ class PoseGraphInterface {
                               const Transformation& T_S1_S2);
   void addLoopClosureMeasurement(const SubmapID& from_submap,
                                  const SubmapID& to_submap,
-                                 const Transformation& transform);
+                                 const Transformation& transform,
+                                 const Constraint::InformationMatrix& information);
   void addGpsMeasurement() {}
   void addHeightMeasurement(const SubmapID& submap_id, const double& height);
 

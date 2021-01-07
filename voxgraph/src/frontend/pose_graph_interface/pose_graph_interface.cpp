@@ -67,14 +67,14 @@ void PoseGraphInterface::addOdometryMeasurement(
 
 void PoseGraphInterface::addLoopClosureMeasurement(
     const SubmapID& from_submap, const SubmapID& to_submap,
-    const Transformation& transform) {
+    const Transformation& transform, const Constraint::InformationMatrix& information) {
   // Configure the loop closure constraint
   RelativePoseConstraint::Config constraint_config =
       measurement_templates_.loop_closure;
   constraint_config.origin_submap_id = from_submap;
   constraint_config.destination_submap_id = to_submap;
   constraint_config.T_origin_destination = transform;
-
+  constraint_config.information_matrix = information;
   // Add the constraint to the pose graph
   ROS_INFO_STREAM_COND(verbose_,
                        "Adding loop closure as relative pose constraint "

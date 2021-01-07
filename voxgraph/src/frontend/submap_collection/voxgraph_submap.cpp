@@ -31,6 +31,7 @@ VoxgraphSubmap::VoxgraphSubmap(
 }
 
 void VoxgraphSubmap::transformSubmap(const voxblox::Transformation& T_new_old) {
+  ROS_INFO("TransformSubmap");
   // Transform TSDF
   voxblox::Layer<voxblox::TsdfVoxel> old_tsdf_layer(tsdf_map_->getTsdfLayer());
   voxblox::transformLayer(old_tsdf_layer, T_new_old,
@@ -77,6 +78,7 @@ bool VoxgraphSubmap::lookupPoseByTime(
 }
 
 void VoxgraphSubmap::finishSubmap() {
+  ROS_INFO("FinishSubmap");
   // Generate the cached the ESDF
   generateEsdf();
 

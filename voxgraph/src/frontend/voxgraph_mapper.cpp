@@ -215,7 +215,7 @@ void VoxgraphMapper::pointcloudCallback(
   if (submap_collection_ptr_->shouldCreateNewSubmap(current_timestamp)) {
     // Automatically pause the rosbag if requested
     if (auto_pause_rosbag_) rosbag_helper_.pauseRosbag();
-
+    ROS_INFO("Pointcloudcallback, new submap:");
     // Make sure that the last optimization has completed
     // NOTE: This is important, because switchToNewSubmap(...) updates the
     //       constraints collection, which causes segfaults if it's still in use
@@ -238,7 +238,7 @@ void VoxgraphMapper::pointcloudCallback(
         std::launch::async, &VoxgraphMapper::optimizePoseGraph, this);
 
     // Publish the map in its different representations
-    publishMaps(current_timestamp);
+    //publishMaps(current_timestamp);
 
     // Resume playing the rosbag
     if (auto_pause_rosbag_) rosbag_helper_.playRosbag();
@@ -262,6 +262,8 @@ void VoxgraphMapper::pointcloudCallback(
         *submap_collection_ptr_,
         map_tracker_.getFrameNames().output_mission_frame, pose_history_pub_);
   }
+  // Publish the map in its different representations
+  publishMaps(current_timestamp);
 }
 
 void VoxgraphMapper::loopClosureCallback(
@@ -321,8 +323,14 @@ void VoxgraphMapper::loopClosureCallback(
   Transformation T_t1_t2(translation.cast<voxblox::FloatingPoint>(),
                          rotation.cast<voxblox::FloatingPoint>());
   Transformation T_AB = T_A_t1 * T_t1_t2 * T_B_t2.inverse();
-  pose_graph_interface_.addLoopClosureMeasurement(submap_id_A, submap_id_B,
-                                                  T_AB);
+  Constraint::InformationMatrix information;
+  information << 1, 0, 0, 0,
+                 0, 1, 0, 0,
+                 0, 0, 1, 0,
+                 0, 0, 0, 250;
+
+  pose_graph_interface_.addLoopClosureMeasurement(
+      submap_id_A, submap_id_B, T_AB, information);
 
   // Visualize the loop closure link
   const Transformation& T_M_A = submap_A.getPose();
@@ -457,6 +465,7 @@ bool VoxgraphMapper::saveOptimizationTimesCallback(
 void VoxgraphMapper::switchToNewSubmap(const ros::Time& current_timestamp) {
   // Indicate that the previous submap is finished
   // s.t. its cached members are generated
+  ROS_INFO("switchToNewSubmap");
   if (!submap_collection_ptr_->empty()) {
     submap_collection_ptr_->getActiveSubmapPtr()->finishSubmap();
   }
@@ -514,9 +523,11 @@ int VoxgraphMapper::optimizePoseGraph() {
   pose_graph_interface_.optimize();
 
   // Update the submap poses
+  ROS_INFO("Update Submap Collection Poses");
   pose_graph_interface_.updateSubmapCollectionPoses();
 
   // Publish updated poses
+  ROS_INFO("Publish Submap poses");
   submap_server_.publishSubmapPoses(submap_collection_ptr_, ros::Time::now());
 
   // Report successful completion
@@ -553,8 +564,8 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
                                             current_timestamp, true);
   
   // Publish the submap collection - ESDF
-  projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
-                                            current_timestamp, false);
+  // projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
+  //                                           current_timestamp, false);
 
   // Publish the submap poses
   submap_server_.publishSubmapPoses(submap_collection_ptr_, current_timestamp);
@@ -562,5 +573,6 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
   // Publish the loop closure edges
   loop_closure_edge_server_.publishLoopClosureEdges(
       pose_graph_interface_, *submap_collection_ptr_, current_timestamp);
+  ROS_INFO("Published maps");
 }
 }  // namespace voxgraph
