@@ -538,18 +538,25 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
   // Publish the meshes if there are subscribers
   // NOTE: Users can request new meshes at any time through service calls
   //       so there's no point in publishing them just in case
+
+  std::clock_t timer;
+  timer = std::clock();
   if (combined_mesh_pub_.getNumSubscribers() > 0) {
     ThreadingHelper::launchBackgroundThread(
         &SubmapVisuals::publishCombinedMesh, &submap_vis_,
         *submap_collection_ptr_,
         map_tracker_.getFrameNames().output_mission_frame, combined_mesh_pub_);
   }
+  double combined_map_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
   if (separated_mesh_pub_.getNumSubscribers() > 0) {
     ThreadingHelper::launchBackgroundThread(
         &SubmapVisuals::publishSeparatedMesh, &submap_vis_,
         *submap_collection_ptr_,
         map_tracker_.getFrameNames().output_mission_frame, separated_mesh_pub_);
   }
+  double separated_map_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
 
   // Publish the previous (finished) submap
   if (submap_collection_ptr_->size() > 1) {
@@ -558,21 +565,42 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
         submap_collection_ptr_->getSubmap(previous_submap_id),
         current_timestamp);
   }
+  double submap_collection_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
 
   // Publish the submap collection - TSDF
   projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
                                             current_timestamp, true);
-  
+  double projected_tsdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
+
   // Publish the submap collection - ESDF
-  // projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
-  //                                           current_timestamp, false);
+  projected_map_server_.publishProjectedMap(*submap_collection_ptr_,
+                                            current_timestamp, false);
+  double projected_esdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
 
   // Publish the submap poses
   submap_server_.publishSubmapPoses(submap_collection_ptr_, current_timestamp);
+  double submap_poses_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
 
   // Publish the loop closure edges
   loop_closure_edge_server_.publishLoopClosureEdges(
       pose_graph_interface_, *submap_collection_ptr_, current_timestamp);
+  double loop_clousure_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
+
   ROS_INFO("Published maps");
+  std::cout << "Published maps timing: \n"
+          <<"----------------------- \n"
+          <<"combined_mesh_timer " << combined_map_timer << "\n"
+          <<"separated_mesh_timer " << separated_map_timer  << "\n"
+          <<"submap_collection_timer " << submap_collection_timer    << "\n"
+          <<"projected_tsdf_timer " << projected_tsdf_timer  << "\n"
+          <<"projected_esdf_timer " << projected_esdf_timer   << "\n"
+          <<"submap_poses_timer " << submap_poses_timer  << "\n"
+          <<"loop_closure_timer " << loop_clousure_timer  << std::endl;
+
 }
 }  // namespace voxgraph
