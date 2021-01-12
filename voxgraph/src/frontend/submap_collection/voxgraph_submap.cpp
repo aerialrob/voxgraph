@@ -77,6 +77,12 @@ bool VoxgraphSubmap::lookupPoseByTime(
   return true;
 }
 
+void VoxgraphSubmap::generateCollectionEsdf() {
+  //ROS_INFO("Generate Esdf map");
+  // Generate the cached the ESDF
+  generateEsdf(); 
+}
+
 void VoxgraphSubmap::finishSubmap() {
   ROS_INFO("FinishSubmap");
   // Generate the cached the ESDF

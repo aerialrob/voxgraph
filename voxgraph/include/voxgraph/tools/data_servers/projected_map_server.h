@@ -12,8 +12,11 @@ class ProjectedMapServer {
   explicit ProjectedMapServer(ros::NodeHandle nh_private);
 
   // Publish the map using this map server instance's ros publisher member
-  void publishProjectedMap(const VoxgraphSubmapCollection& submap_collection,
-                           const ros::Time& timestamp, bool tsdf_layer);
+  void publishProjectedMap(
+      const VoxgraphSubmapCollection& submap_collection,
+      const VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map,
+      const VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map,
+      const ros::Time& timestamp, bool tsdf_layer);
 
   // "Bring your own publisher" method
   // NOTE: This method is provided s.t. it can be called using publishers to
@@ -21,8 +24,22 @@ class ProjectedMapServer {
   //       It is therefore static.
   static void publishProjectedMap(
       const VoxgraphSubmapCollection& submap_collection,
-      const ros::Time& timestamp,
-      const ros::Publisher& projected_map_publisher, bool tsdf_layer);
+      const VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map,
+      const VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map,
+      const ros::Time& timestamp, const ros::Publisher& projected_map_publisher,
+      bool tsdf_layer);
+
+  VoxgraphSubmapCollection::ProjectedTsdfMapPtr getProjectedTsdfMap(
+      const VoxgraphSubmapCollection& submap_collection);
+  VoxgraphSubmapCollection::ProjectedEsdfMapPtr getProjectedEsdfMap(
+      VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map);
+
+  void updateProjectedTsdfMap(
+      VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map,
+      VoxgraphSubmap* active_submap);
+  void updateProjectedEsdfMap(
+      VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map, 
+      VoxgraphSubmap* active_submap);
 
  private:
   ros::Publisher projected_tsdf_map_pub_;

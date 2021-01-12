@@ -23,6 +23,8 @@ class VoxgraphSubmapCollection
   typedef std::shared_ptr<VoxgraphSubmapCollection> Ptr;
   typedef std::shared_ptr<const VoxgraphSubmapCollection> ConstPtr;
   typedef std::vector<geometry_msgs::PoseStamped> PoseStampedVector;
+  typedef std::shared_ptr<voxblox::TsdfMap> ProjectedTsdfMapPtr;
+  typedef std::shared_ptr<voxblox::EsdfMap> ProjectedEsdfMapPtr;
 
   explicit VoxgraphSubmapCollection(VoxgraphSubmap::Config submap_config,
                                     bool verbose = false)

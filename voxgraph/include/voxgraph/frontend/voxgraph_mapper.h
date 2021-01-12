@@ -145,6 +145,8 @@ class VoxgraphMapper {
   // Instantiate the submap collection
   VoxgraphSubmap::Config submap_config_;
   VoxgraphSubmapCollection::Ptr submap_collection_ptr_;
+  VoxgraphSubmapCollection::ProjectedTsdfMapPtr submap_collection_tsdf_map_;
+  VoxgraphSubmapCollection::ProjectedEsdfMapPtr submap_collection_esdf_map_;
 
   // Visualization tools
   SubmapVisuals submap_vis_;

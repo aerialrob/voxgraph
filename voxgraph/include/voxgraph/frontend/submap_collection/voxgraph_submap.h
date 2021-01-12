@@ -55,6 +55,8 @@ class VoxgraphSubmap : public cblox::TsdfEsdfSubmap {
   // Indicate that the submap is finished and generate all cached members
   // NOTE: These cached members are mainly used in the registration cost funcs
   virtual void finishSubmap() override;
+  // Generate esdf from tsdf 
+  void generateCollectionEsdf();
 
   void transformSubmap(const voxblox::Transformation& T_new_old);
 
