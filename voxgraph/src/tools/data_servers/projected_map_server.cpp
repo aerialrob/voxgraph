@@ -67,9 +67,9 @@ void ProjectedMapServer::publishProjectedMap(
         static_cast<uint8_t>(voxblox::MapDerializationAction::kUpdate);
     double serializeLayerESDF = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
     timer = std::clock();
-    std::cout << "Serialize ESDF: \n"
-              << "----------------------- \n"
-              << "serializeLayerESDF " << serializeLayerESDF << "\n";
+    // std::cout << "Serialize ESDF: \n"
+    //           << "----------------------- \n"
+    //           << "serializeLayerESDF " << serializeLayerESDF << "\n";
   }
 
   // Publish
@@ -126,9 +126,9 @@ void ProjectedMapServer::updateProjectedEsdfMap(VoxgraphSubmapCollection::Projec
             T_G_S, combined_esdf_layer_ptr);
 
   double updateProjectedEsdfMap = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  std::cout << "updateProjectedEsdfMap : \n"
-              << "----------------------- \n"
-              << "updateProjectedEsdfMap " << updateProjectedEsdfMap << "\n";
+  // std::cout << "updateProjectedEsdfMap : \n"
+  //             << "----------------------- \n"
+  //             << "updateProjectedEsdfMap " << updateProjectedEsdfMap << "\n";
 }
 
 std_msgs::Header ProjectedMapServer::generateHeaderMsg(

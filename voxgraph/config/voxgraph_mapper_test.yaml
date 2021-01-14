@@ -6,10 +6,10 @@ submap_creation_interval: 10
 subscriber_queue_length: 10
 
 input_odom_frame: "world"
-input_base_link_frame: "firefly/base_link"
+input_base_link_frame: "camera_link_noisy" #"firefly/base_link"
 output_mission_frame: "world"
 output_odom_frame: "world"
-output_base_link_frame: "firefly/base_link"
+output_base_link_frame: "camera_link_noisy"
 output_sensor_frame: "sensor_voxgraph"
 
 # T_base_sensor:
@@ -26,6 +26,7 @@ tsdf_integrator:
   use_weight_dropoff: true
   use_sparsity_compensation_factor: true
   sparsity_compensation_factor: 20.0
+  #method: "merged"
   # integration_order_mode: "sorted"
 
 measurements:

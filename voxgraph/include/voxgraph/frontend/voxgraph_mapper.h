@@ -101,6 +101,7 @@ class VoxgraphMapper {
   void switchToNewSubmap(const ros::Time& current_timestamp);
   int optimizePoseGraph();
   void publishMaps(const ros::Time& current_timestamp);
+  void publishProjectedMaps(const ros::Time& current_timestamp);
 
   // Asynchronous handle for the pose graph optimization thread
   std::future<int> optimization_async_handle_;
@@ -122,6 +123,7 @@ class VoxgraphMapper {
   ros::Publisher active_mesh_pub_;
   ros::Publisher combined_mesh_pub_;
   ros::Publisher pose_history_pub_;
+  ros::Publisher last_pose_pub_;
   ros::Publisher loop_closure_links_pub_;
   ros::Publisher loop_closure_axes_pub_;
 

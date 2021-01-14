@@ -149,15 +149,21 @@ void SubmapVisuals::publishBox(const BoxCornerMatrix& box_corner_matrix,
 
 void SubmapVisuals::publishPoseHistory(
     const VoxgraphSubmapCollection& submap_collection,
-    const std::string& mission_frame, const ros::Publisher& publisher) const {
+    const std::string& mission_frame, const ros::Publisher& publisher, const ros::Publisher& publisher_last_pose) const {
   // Create the pose history message
   nav_msgs::Path pose_history_msg;
   pose_history_msg.header.stamp = ros::Time::now();
   pose_history_msg.header.frame_id = mission_frame;
   pose_history_msg.poses = submap_collection.getPoseHistory();
 
+  geometry_msgs::PoseStamped last_pose_msg;
+  last_pose_msg.header.stamp = ros::Time::now();
+  last_pose_msg.header.frame_id = mission_frame;
+  last_pose_msg.pose = submap_collection.getPoseHistory().back().pose;
+  
   // Publish the message
   publisher.publish(pose_history_msg);
+  publisher_last_pose.publish(last_pose_msg);
 }
 
 // TODO(victorr): Implement TSDF visualization

@@ -9,6 +9,7 @@
 #include <minkindr_conversions/kindr_msg.h>
 #include <minkindr_conversions/kindr_tf.h>
 #include <nav_msgs/Path.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <ros/ros.h>
 #include <voxblox_ros/mesh_vis.h>
 
@@ -56,7 +57,8 @@ class SubmapVisuals {
 
   void publishPoseHistory(const VoxgraphSubmapCollection& submap_collection,
                           const std::string& mission_frame,
-                          const ros::Publisher& publisher) const;
+                          const ros::Publisher& publisher, 
+                          const ros::Publisher& publisher_last_pose) const;
 
  private:
   voxblox::MeshIntegratorConfig mesh_config_;

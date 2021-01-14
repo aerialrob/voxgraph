@@ -164,6 +164,8 @@ void VoxgraphMapper::advertiseTopics() {
       "combined_mesh", subscriber_queue_length_, true);
   pose_history_pub_ =
       nh_private_.advertise<nav_msgs::Path>("pose_history", 1, true);
+  last_pose_pub_ =
+      nh_private_.advertise<geometry_msgs::PoseStamped>("last_pose", 1, true);
   loop_closure_links_pub_ =
       nh_private_.advertise<visualization_msgs::MarkerArray>(
           "loop_closure_links_vis", subscriber_queue_length_, true);
@@ -238,7 +240,7 @@ void VoxgraphMapper::pointcloudCallback(
         std::launch::async, &VoxgraphMapper::optimizePoseGraph, this);
 
     // Publish the map in its different representations
-    //publishMaps(current_timestamp);
+    publishMaps(current_timestamp);
 
     // Resume playing the rosbag
     if (auto_pause_rosbag_) rosbag_helper_.playRosbag();
@@ -274,10 +276,10 @@ void VoxgraphMapper::pointcloudCallback(
   if (pose_history_pub_.getNumSubscribers() > 0) {
     submap_vis_.publishPoseHistory(
         *submap_collection_ptr_,
-        map_tracker_.getFrameNames().output_mission_frame, pose_history_pub_);
+        map_tracker_.getFrameNames().output_mission_frame, pose_history_pub_, last_pose_pub_);
   }
   // Publish the map in its different representations
-  publishMaps(current_timestamp);
+  publishProjectedMaps(current_timestamp);
 }
 
 void VoxgraphMapper::loopClosureCallback(
@@ -548,6 +550,33 @@ int VoxgraphMapper::optimizePoseGraph() {
   return 1;
 }
 
+void VoxgraphMapper::publishProjectedMaps(const ros::Time& current_timestamp){
+  std::clock_t timer;
+  timer = std::clock();
+
+  // Publish the submap collection - TSDF
+  projected_map_server_.publishProjectedMap(
+      *submap_collection_ptr_, submap_collection_tsdf_map_,
+      submap_collection_esdf_map_, current_timestamp, true);
+  double projected_tsdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
+
+  // Publish the submap collection - ESDF
+  projected_map_server_.publishProjectedMap(
+      *submap_collection_ptr_, submap_collection_tsdf_map_,
+      submap_collection_esdf_map_, current_timestamp, false);
+  double projected_esdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
+
+  // ROS_INFO("Published maps");
+  // std::cout << "Published maps timing: \n"
+  //           << "----------------------- \n"
+  //           << "projected_tsdf_timer " << projected_tsdf_timer << "\n"
+  //           << "projected_esdf_timer " << projected_esdf_timer << "\n";
+
+}
+
+
 void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
   // Publish the meshes if there are subscribers
   // NOTE: Users can request new meshes at any time through service calls
@@ -576,21 +605,6 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
         current_timestamp);
   }
 
-  std::clock_t timer;
-  timer = std::clock();
-  // Publish the submap collection - TSDF
-  projected_map_server_.publishProjectedMap(
-      *submap_collection_ptr_, submap_collection_tsdf_map_,
-      submap_collection_esdf_map_, current_timestamp, true);
-  double projected_tsdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  timer = std::clock();
-
-  // Publish the submap collection - ESDF
-  projected_map_server_.publishProjectedMap(
-      *submap_collection_ptr_, submap_collection_tsdf_map_,
-      submap_collection_esdf_map_, current_timestamp, false);
-  double projected_esdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  timer = std::clock();
 
   // Publish the submap poses
   submap_server_.publishSubmapPoses(submap_collection_ptr_, current_timestamp);
@@ -598,13 +612,6 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
   // Publish the loop closure edges
   loop_closure_edge_server_.publishLoopClosureEdges(
       pose_graph_interface_, *submap_collection_ptr_, current_timestamp);
-
-  ROS_INFO("Published maps");
-  std::cout << "Published maps timing: \n"
-            << "----------------------- \n"
-            << "projected_tsdf_timer " << projected_tsdf_timer << "\n"
-            << "projected_esdf_timer " << projected_esdf_timer << "\n";
-
 
 }
 }  // namespace voxgraph
