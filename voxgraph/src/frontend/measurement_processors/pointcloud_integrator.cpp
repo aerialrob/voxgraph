@@ -3,7 +3,7 @@
 #include <string>
 
 #include <pcl_conversions/pcl_conversions.h>
-#include <voxblox/integrator/projective_tsdf_integrator.h>
+//#include <voxblox/integrator/projective_tsdf_integrator.h>
 #include <voxblox_ros/conversions.h>
 #include <voxblox_ros/ros_params.h>
 

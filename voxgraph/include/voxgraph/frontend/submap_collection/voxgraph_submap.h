@@ -84,7 +84,7 @@ class VoxgraphSubmap : public cblox::TsdfEsdfSubmap {
   // Load a submap from stream.
   // Note: Returns a nullptr if load is unsuccessful.
   static VoxgraphSubmap::Ptr LoadFromStream(const Config& config,
-                                            std::istream* proto_file_ptr,
+                                            std::fstream* proto_file_ptr,
                                             uint64_t* tmp_byte_offset_ptr);
 
  private:

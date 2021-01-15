@@ -240,7 +240,7 @@ void VoxgraphMapper::pointcloudCallback(
         std::launch::async, &VoxgraphMapper::optimizePoseGraph, this);
 
     // Publish the map in its different representations
-    publishMaps(current_timestamp);
+    //publishMaps(current_timestamp);
 
     // Resume playing the rosbag
     if (auto_pause_rosbag_) rosbag_helper_.playRosbag();
@@ -279,7 +279,7 @@ void VoxgraphMapper::pointcloudCallback(
         map_tracker_.getFrameNames().output_mission_frame, pose_history_pub_, last_pose_pub_);
   }
   // Publish the map in its different representations
-  publishProjectedMaps(current_timestamp);
+  publishMaps(current_timestamp);
 }
 
 void VoxgraphMapper::loopClosureCallback(
@@ -605,6 +605,22 @@ void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {
         current_timestamp);
   }
 
+  std::clock_t timer;
+  timer = std::clock();
+
+    // Publish the submap collection - TSDF
+  projected_map_server_.publishProjectedMap(
+      *submap_collection_ptr_, submap_collection_tsdf_map_,
+      submap_collection_esdf_map_, current_timestamp, true);
+  double projected_tsdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
+
+  // Publish the submap collection - ESDF
+  projected_map_server_.publishProjectedMap(
+      *submap_collection_ptr_, submap_collection_tsdf_map_,
+      submap_collection_esdf_map_, current_timestamp, false);
+  double projected_esdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  timer = std::clock();
 
   // Publish the submap poses
   submap_server_.publishSubmapPoses(submap_collection_ptr_, current_timestamp);

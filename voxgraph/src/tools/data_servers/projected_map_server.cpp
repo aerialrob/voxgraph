@@ -110,22 +110,24 @@ void ProjectedMapServer::updateProjectedEsdfMap(VoxgraphSubmapCollection::Projec
   voxblox::Layer<voxblox::EsdfVoxel>* combined_esdf_layer_ptr =
       collection_esdf_map->getEsdfLayerPtr();
 
-  Transformation T_identity;
-  const Transformation& T = active_submap->getPose();
-  VoxgraphSubmap::Ptr active_map_ptr = std::make_shared<VoxgraphSubmap>(
-      T_identity, 1, active_submap->getTsdfMap().getTsdfLayer());
-  active_map_ptr->generateCollectionEsdf();
+  // Transformation T_identity;
+  // const Transformation& T = active_submap->getPose();
+  // VoxgraphSubmap::Ptr active_map_ptr = std::make_shared<VoxgraphSubmap>(
+  //     T_identity, 1, active_submap->getTsdfMap().getTsdfLayer());
+  // active_map_ptr->generateCollectionEsdf();
 
   // Getting the esdf submap and its pose
-  const voxblox::EsdfMap& esdf_map = active_map_ptr->getEsdfMap();
-  const Transformation& T_G_S = active_submap->getPose();
+  // const voxblox::EsdfMap& esdf_map = active_map_ptr->getEsdfMap();
+  // const Transformation& T_G_S = active_submap->getPose();
 
+  active_submap->updateProjectedEsdf(collection_esdf_map->getEsdfLayerPtr(),
+                                      active_submap->getTsdfMapPtr()->getTsdfLayerPtr());
 
   // Merging layers the submap into the global layer
-   voxblox::mergeLayerAintoLayerB(active_map_ptr->getEsdfMap().getEsdfLayer(),
-            T_G_S, combined_esdf_layer_ptr);
+  //  voxblox::mergeLayerAintoLayerB(active_map_ptr->getEsdfMap().getEsdfLayer(),
+  //           T_G_S, combined_esdf_layer_ptr);
 
-  double updateProjectedEsdfMap = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+  //double updateProjectedEsdfMap = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
   // std::cout << "updateProjectedEsdfMap : \n"
   //             << "----------------------- \n"
   //             << "updateProjectedEsdfMap " << updateProjectedEsdfMap << "\n";
