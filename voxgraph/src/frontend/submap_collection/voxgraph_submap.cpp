@@ -6,17 +6,22 @@
 #include <voxblox/integrator/merge_integration.h>
 #include <voxblox/interpolator/interpolator.h>
 #include <voxblox/mesh/mesh_integrator.h>
+#include <voxblox/integrator/esdf_integrator.h>
 
 namespace voxgraph {
-VoxgraphSubmap::VoxgraphSubmap(const voxblox::Transformation& T_M_S,
-                               const cblox::SubmapID& submap_id,
-                               const voxgraph::VoxgraphSubmap::Config& config)
-    : cblox::TsdfEsdfSubmap(T_M_S, submap_id, config), config_(config) {}
+VoxgraphSubmap::VoxgraphSubmap(
+    const voxblox::Transformation& T_M_S, const cblox::SubmapID& submap_id,
+    const voxgraph::VoxgraphSubmap::Config& config,
+    const voxblox::EsdfIntegrator::Config& esdf_integrator_config)
+    : cblox::TsdfEsdfSubmap(T_M_S, submap_id, config, esdf_integrator_config),
+      config_(config) {}
 
 VoxgraphSubmap::VoxgraphSubmap(
     const voxblox::Transformation& T_M_S, const cblox::SubmapID& submap_id,
-    const voxblox::Layer<voxblox::TsdfVoxel>& tsdf_layer)
-    : cblox::TsdfEsdfSubmap(T_M_S, submap_id, Config()) {
+    const voxblox::Layer<voxblox::TsdfVoxel>& tsdf_layer,
+    const voxblox::EsdfIntegrator::Config& esdf_integrator_config)
+    : cblox::TsdfEsdfSubmap(T_M_S, submap_id, Config(),
+                            esdf_integrator_config) {
   // Update the inherited TsdfEsdfSubmap config
   config_.tsdf_voxel_size = tsdf_layer.voxel_size();
   config_.tsdf_voxels_per_side = tsdf_layer.voxels_per_side();
@@ -398,7 +403,7 @@ const BoxCornerMatrix VoxgraphSubmap::getMissionFrameSubmapAabbCorners() const {
 }
 
 VoxgraphSubmap::Ptr VoxgraphSubmap::LoadFromStream(
-    const Config& config, std::fstream* proto_file_ptr,
+    const Config& config, std::istream* proto_file_ptr,
     uint64_t* tmp_byte_offset_ptr) {
   // Note(alexmillane): There is no difference (for now) between the information
   // loaded in a VoxgraphSubmap and a TsdfEsdfSubmap. Therefore we just load the

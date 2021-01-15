@@ -31,12 +31,16 @@ class VoxgraphSubmap : public cblox::TsdfEsdfSubmap {
   };
 
   VoxgraphSubmap(const voxblox::Transformation& T_M_S,
-                 const cblox::SubmapID& submap_id, const Config& config);
+                 const cblox::SubmapID& submap_id, const Config& config,
+                 const voxblox::EsdfIntegrator::Config& esdf_integrator_config =
+                     voxblox::EsdfIntegrator::Config());
 
   // Create a VoxgraphSubmap based on a COPY of a TsdfLayer
   VoxgraphSubmap(const voxblox::Transformation& T_M_S,
                  const cblox::SubmapID& submap_id,
-                 const voxblox::Layer<voxblox::TsdfVoxel>& tsdf_layer);
+                 const voxblox::Layer<voxblox::TsdfVoxel>& tsdf_layer,
+                 const voxblox::EsdfIntegrator::Config& esdf_integrator_config =
+                     voxblox::EsdfIntegrator::Config());
 
   // Setter method for the registration filter config
   // NOTE: This method is mainly useful for copy or proto constructed submaps
@@ -80,7 +84,7 @@ class VoxgraphSubmap : public cblox::TsdfEsdfSubmap {
   // Load a submap from stream.
   // Note: Returns a nullptr if load is unsuccessful.
   static VoxgraphSubmap::Ptr LoadFromStream(const Config& config,
-                                            std::fstream* proto_file_ptr,
+                                            std::istream* proto_file_ptr,
                                             uint64_t* tmp_byte_offset_ptr);
 
  private:
