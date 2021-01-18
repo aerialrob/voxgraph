@@ -250,19 +250,24 @@ void VoxgraphMapper::pointcloudCallback(
   pointcloud_integrator_.integratePointcloud(
       pointcloud_msg, map_tracker_.get_T_S_C(),
       submap_collection_ptr_->getActiveSubmapPtr().get());
+  
+  submap_collection_ptr_->getActiveSubmapPtr()->generateCollectionEsdf();
+  const Transformation T_identity;
+  submap_collection_ptr_->getActiveSubmapPtr()->updateProjectedEsdf(T_identity.getPosition());
 
   if (submap_collection_ptr_->size() > 1) {
-    projected_map_server_.updateProjectedTsdfMap(
+    projected_map_server_.updateProjectedTsdfCollection(
         submap_collection_tsdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
-    projected_map_server_.updateProjectedEsdfMap(
-    submap_collection_esdf_map_,
-    submap_collection_ptr_->getActiveSubmapPtr().get());
+    projected_map_server_.updateProjectedEsdfCollection(
+        submap_collection_esdf_map_,
+        submap_collection_ptr_->getActiveSubmapPtr().get());
+
   } else if (submap_collection_ptr_->size() == 1) {
     submap_collection_tsdf_map_ =
         projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
     submap_collection_esdf_map_ =
-        projected_map_server_.getProjectedEsdfMap(submap_collection_tsdf_map_);
+        projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
   }
 
   // Add the current pose to the submap's pose history

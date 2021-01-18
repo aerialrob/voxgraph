@@ -80,15 +80,37 @@ VoxgraphSubmapCollection::ProjectedTsdfMapPtr ProjectedMapServer::getProjectedTs
   return submap_collection.getProjectedMap();
 }
 
-VoxgraphSubmapCollection::ProjectedEsdfMapPtr ProjectedMapServer::getProjectedEsdfMap(VoxgraphSubmapCollection::ProjectedTsdfMapPtr&  collection_tsdf_map){
-  Transformation T_identity;
-  VoxgraphSubmap::Ptr projected_map_ptr = std::make_shared<VoxgraphSubmap>(
-      T_identity, 1, collection_tsdf_map->getTsdfLayer());
-  projected_map_ptr->generateCollectionEsdf();
-  return projected_map_ptr->getEsdfMapPtr();
+VoxgraphSubmapCollection::ProjectedEsdfMapPtr ProjectedMapServer::getProjectedEsdfMap(const VoxgraphSubmapCollection& submap_collection){
+  return submap_collection.getProjectedEsdfMap();
 }
 
-void ProjectedMapServer::updateProjectedTsdfMap(VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map, VoxgraphSubmap* active_submap){
+
+
+// void ProjectedMapServer::updateProjectedTsdfCollection(VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map, VoxgraphSubmap* active_submap){
+
+//   voxblox::Layer<voxblox::TsdfVoxel>* combined_tsdf_layer_ptr =
+//       collection_tsdf_map->getTsdfLayerPtr();
+
+//   // Getting the tsdf submap and its pose
+//   const voxblox::TsdfMap& tsdf_map = active_submap->getTsdfMap();
+//   const Transformation& T_G_S = active_submap->getPose();
+
+//   voxblox::Layer<voxblox::TsdfVoxel> active_tsdf_transformed(active_submap->getTsdfMap().getTsdfLayer().voxel_size(), active_submap->getTsdfMap().getTsdfLayer().voxels_per_side());
+
+//   // Transform the active submap to the correct position and orientation 
+//   voxblox::transformLayer(tsdf_map.getTsdfLayer(), T_G_S, &active_tsdf_transformed);
+  
+//   // Merging layers the submap into the global layer
+//   voxblox::mergeLayerAintoLayerB(active_tsdf_transformed,
+//                                  combined_tsdf_layer_ptr);
+
+//   updateProjectedEsdfCollection(collection_esdf_map, active_submap,
+//                                 active_tsdf_transformed, current_position);
+
+                        
+// }
+
+void ProjectedMapServer::updateProjectedTsdfCollection(VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map, VoxgraphSubmap* active_submap){
 
   voxblox::Layer<voxblox::TsdfVoxel>* combined_tsdf_layer_ptr =
       collection_tsdf_map->getTsdfLayerPtr();
@@ -100,38 +122,56 @@ void ProjectedMapServer::updateProjectedTsdfMap(VoxgraphSubmapCollection::Projec
   // Merging layers the submap into the global layer
   voxblox::mergeLayerAintoLayerB(tsdf_map.getTsdfLayer(), T_G_S,
                           combined_tsdf_layer_ptr);
-  
 }
 
-void ProjectedMapServer::updateProjectedEsdfMap(VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map, VoxgraphSubmap* active_submap){
+void ProjectedMapServer::updateProjectedEsdfCollection(VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map, VoxgraphSubmap* active_submap){
 
-  std::clock_t timer;
-  timer = std::clock();
   voxblox::Layer<voxblox::EsdfVoxel>* combined_esdf_layer_ptr =
       collection_esdf_map->getEsdfLayerPtr();
 
-  // Transformation T_identity;
-  // const Transformation& T = active_submap->getPose();
-  // VoxgraphSubmap::Ptr active_map_ptr = std::make_shared<VoxgraphSubmap>(
-  //     T_identity, 1, active_submap->getTsdfMap().getTsdfLayer());
-  // active_map_ptr->generateCollectionEsdf();
-
-  // Getting the esdf submap and its pose
-  // const voxblox::EsdfMap& esdf_map = active_map_ptr->getEsdfMap();
-  // const Transformation& T_G_S = active_submap->getPose();
-
-  active_submap->updateProjectedEsdf(collection_esdf_map->getEsdfLayerPtr(),
-                                      active_submap->getTsdfMapPtr()->getTsdfLayerPtr());
-
-  // Merging layers the submap into the global layer
-  //  voxblox::mergeLayerAintoLayerB(active_map_ptr->getEsdfMap().getEsdfLayer(),
-  //           T_G_S, combined_esdf_layer_ptr);
-
-  //double updateProjectedEsdfMap = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  // std::cout << "updateProjectedEsdfMap : \n"
-  //             << "----------------------- \n"
-  //             << "updateProjectedEsdfMap " << updateProjectedEsdfMap << "\n";
+  // Getting the tsdf submap and its pose
+  const voxblox::EsdfMap& esdf_map = active_submap->getEsdfMap();
+  const Transformation& T_G_S = active_submap->getPose();
+  
+  voxblox::mergeLayerAintoLayerB(esdf_map.getEsdfLayer(), T_G_S, combined_esdf_layer_ptr);
 }
+
+
+
+
+
+// void ProjectedMapServer::updateProjectedEsdfCollection(VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map, VoxgraphSubmap* active_submap, voxblox::Layer<voxblox::TsdfVoxel>& active_tsdf_transformed , const Transformation current_position){
+
+//   std::clock_t timer;
+//   timer = std::clock();
+//   voxblox::Layer<voxblox::EsdfVoxel>* combined_esdf_layer_ptr =
+//       collection_esdf_map->getEsdfLayerPtr();
+
+//   Transformation T_identity;
+//   // const Transformation& T = active_submap->getPose();
+//   VoxgraphSubmap::Ptr active_map_ptr = std::make_shared<VoxgraphSubmap>(
+//       T_identity, 1, active_tsdf_transformed);
+//   active_map_ptr->generateCollectionEsdf();
+//   active_map_ptr->updateProjectedEsdf(collection_esdf_map->getEsdfLayerPtr(),
+//                                        active_submap->getTsdfMapPtr()->getTsdfLayerPtr(), current_position.getPosition());
+//   // Getting the esdf submap and its pose
+//   const voxblox::EsdfMap& esdf_map = active_map_ptr->getEsdfMap();
+//   const Transformation& T_G_S = active_submap->getPose();
+
+//   // active_submap->updateProjectedEsdf(collection_esdf_map->getEsdfLayerPtr(),
+//   //                                     active_submap->getTsdfMapPtr()->getTsdfLayerPtr(), current_position.getPosition());
+//   // active_submap->updateProjectedEsdf(collection_esdf_map->getEsdfLayerPtr(),
+//   //                                     &active_tsdf_transformed, current_position.getPosition());
+
+//   // Merging layers the submap into the global layer
+//   voxblox::mergeLayerAintoLayerB(active_map_ptr->getEsdfMap().getEsdfLayer(),
+//            T_identity, combined_esdf_layer_ptr);
+
+//   //double updateProjectedEsdfMap = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
+//   // std::cout << "updateProjectedEsdfMap : \n"
+//   //             << "----------------------- \n"
+//   //             << "updateProjectedEsdfMap " << updateProjectedEsdfMap << "\n";
+// }
 
 std_msgs::Header ProjectedMapServer::generateHeaderMsg(
     const ros::Time& timestamp) {

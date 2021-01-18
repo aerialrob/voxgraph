@@ -32,13 +32,13 @@ class ProjectedMapServer {
   VoxgraphSubmapCollection::ProjectedTsdfMapPtr getProjectedTsdfMap(
       const VoxgraphSubmapCollection& submap_collection);
   VoxgraphSubmapCollection::ProjectedEsdfMapPtr getProjectedEsdfMap(
-      VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map);
+      const VoxgraphSubmapCollection& submap_collection);
 
-  void updateProjectedTsdfMap(
+  void updateProjectedTsdfCollection(
       VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map,
       VoxgraphSubmap* active_submap);
-  void updateProjectedEsdfMap(
-      VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map, 
+  void updateProjectedEsdfCollection(
+      VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map,
       VoxgraphSubmap* active_submap);
 
  private:
