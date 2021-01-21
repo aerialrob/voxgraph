@@ -84,7 +84,26 @@ VoxgraphSubmapCollection::ProjectedEsdfMapPtr ProjectedMapServer::getProjectedEs
   return submap_collection.getProjectedEsdfMap();
 }
 
+// void ProjectedMapServer::optimizeEsdfMap(VoxgraphSubmap::Ptr active_submap, const VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map){
+//   std::cout << "Optimize Esdf MAp \n";
+//   voxblox::TsdfMap::Ptr tsdf_map = active_submap->getTsdfMapPtr();
+//   std::cout << "Optimize Esdf MAp 1\n";
+//   voxblox::EsdfMap::Ptr esdf_map = active_submap->getEsdfMapPtr();
+//   std::cout << "Optimize Esdf MAp 2\n";
+//   voxblox::EsdfIntegrator esdf_integrator(
+//       esdf_integrator_config_,
+//       tsdf_map->getTsdfLayerPtr(),
+//       collection_esdf_map->getEsdfLayerPtr());
 
+//   std::cout << " Esdf Integrator \n";
+//   voxblox::Layer<voxblox::EsdfVoxel> active_esdf_transformed(tsdf_map->getTsdfLayer().voxel_size(), tsdf_map->getTsdfLayer().voxels_per_side());
+//   const Transformation& T_G_S = active_submap->getPose();
+//   std::cout << "active_esdf_transformed \n";
+//   // Transform the active submap to the correct position and orientation 
+//   voxblox::transformLayer(esdf_map->getEsdfLayer(), T_G_S, &active_esdf_transformed);
+//   std::cout << "transformLayer \n";
+//   esdf_integrator.updateFromOptimizedEsdfLayer(esdf_map->getEsdfLayerPtr());
+// }
 
 // void ProjectedMapServer::updateProjectedTsdfCollection(VoxgraphSubmapCollection::ProjectedTsdfMapPtr& collection_tsdf_map, VoxgraphSubmap* active_submap){
 

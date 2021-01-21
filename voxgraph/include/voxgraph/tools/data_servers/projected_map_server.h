@@ -5,6 +5,7 @@
 
 #include "voxgraph/common.h"
 #include "voxgraph/frontend/submap_collection/voxgraph_submap_collection.h"
+// #include <voxblox/integrator/esdf_integrator.h>
 
 namespace voxgraph {
 class ProjectedMapServer {
@@ -40,10 +41,14 @@ class ProjectedMapServer {
   void updateProjectedEsdfCollection(
       VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map,
       VoxgraphSubmap* active_submap);
+//   void optimizeEsdfMap(
+//       VoxgraphSubmap::Ptr active_submap,
+//       const VoxgraphSubmapCollection::ProjectedEsdfMapPtr& collection_esdf_map);
 
  private:
   ros::Publisher projected_tsdf_map_pub_;
   ros::Publisher projected_esdf_map_pub_;
+//   voxblox::EsdfIntegrator::Config esdf_integrator_config_;
   //TsdfEsdfSubmap::Ptr submap_ptr_;
   // Convenience methods to generate the message and submap headers
   static std_msgs::Header generateHeaderMsg(const ros::Time& timestamp);

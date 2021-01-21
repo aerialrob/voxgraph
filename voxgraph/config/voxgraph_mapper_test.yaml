@@ -21,12 +21,12 @@ output_sensor_frame: "sensor_voxgraph"
 tsdf_voxel_size: 0.20
 tsdf_integrator:
   truncation_distance: 0.60
-  max_ray_length_m: 8.0
+  max_ray_length_m: 7.0
   use_const_weight: true
   use_weight_dropoff: true
   use_sparsity_compensation_factor: true
   sparsity_compensation_factor: 20.0
-  #method: "merged"
+  method: "merged"
   # integration_order_mode: "sorted"
 
 measurements:

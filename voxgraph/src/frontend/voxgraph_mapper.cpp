@@ -62,6 +62,7 @@ VoxgraphMapper::VoxgraphMapper(const ros::NodeHandle& nh,
   subscribeToTopics();
   advertiseTopics();
   advertiseServices();
+  //optimized_flag_ = false;
 }
 
 void VoxgraphMapper::getParametersFromRos() {
@@ -250,18 +251,33 @@ void VoxgraphMapper::pointcloudCallback(
   pointcloud_integrator_.integratePointcloud(
       pointcloud_msg, map_tracker_.get_T_S_C(),
       submap_collection_ptr_->getActiveSubmapPtr().get());
-  
+  ROS_INFO("Integrate pointcloud");
   submap_collection_ptr_->getActiveSubmapPtr()->generateCollectionEsdf();
   const Transformation T_identity;
-  submap_collection_ptr_->getActiveSubmapPtr()->updateProjectedEsdf(T_identity.getPosition());
 
+  // submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(T_identity.getPosition(),
+  // map_tracker_.get_T_O_B());
+  
+
+  //if(optimized_flag_){
+    // submap_collection_esdf_map_ =
+    //     projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
+    // submap_collection_tsdf_map_ =
+    //     projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
+    //optimized_flag_ = false;
+  //}
+
+  ROS_INFO("Update esdf");
   if (submap_collection_ptr_->size() > 1) {
+
+    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(map_tracker_.get_T_O_B().getPosition(), submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
     projected_map_server_.updateProjectedTsdfCollection(
         submap_collection_tsdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
     projected_map_server_.updateProjectedEsdfCollection(
         submap_collection_esdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
+    
 
   } else if (submap_collection_ptr_->size() == 1) {
     submap_collection_tsdf_map_ =
@@ -551,35 +567,12 @@ int VoxgraphMapper::optimizePoseGraph() {
   ROS_INFO("Publish Submap poses");
   submap_server_.publishSubmapPoses(submap_collection_ptr_, ros::Time::now());
 
+  //ROS_WARN("Success");
+  //optimized_flag_ = true;
   // Report successful completion
   return 1;
 }
 
-void VoxgraphMapper::publishProjectedMaps(const ros::Time& current_timestamp){
-  std::clock_t timer;
-  timer = std::clock();
-
-  // Publish the submap collection - TSDF
-  projected_map_server_.publishProjectedMap(
-      *submap_collection_ptr_, submap_collection_tsdf_map_,
-      submap_collection_esdf_map_, current_timestamp, true);
-  double projected_tsdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  timer = std::clock();
-
-  // Publish the submap collection - ESDF
-  projected_map_server_.publishProjectedMap(
-      *submap_collection_ptr_, submap_collection_tsdf_map_,
-      submap_collection_esdf_map_, current_timestamp, false);
-  double projected_esdf_timer = (double)(std::clock() - timer) / CLOCKS_PER_SEC;
-  timer = std::clock();
-
-  // ROS_INFO("Published maps");
-  // std::cout << "Published maps timing: \n"
-  //           << "----------------------- \n"
-  //           << "projected_tsdf_timer " << projected_tsdf_timer << "\n"
-  //           << "projected_esdf_timer " << projected_esdf_timer << "\n";
-
-}
 
 
 void VoxgraphMapper::publishMaps(const ros::Time& current_timestamp) {

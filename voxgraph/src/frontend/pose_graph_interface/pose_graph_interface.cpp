@@ -205,7 +205,7 @@ void PoseGraphInterface::updateSubmapCollectionPoses() {
     double diff_position =
         (old_transform.getPosition() - submap_pose_kv.second.getPosition())
             .norm();
-    std::cout << " Optimized submap " << submap_pose_kv.first << "change in position " << diff_position <<  "\n";
+    std::cout << " Optimized submap " << submap_pose_kv.first << " change in position " << diff_position <<  "\n";
     submap_collection_ptr_->setSubmapPose(submap_pose_kv.first,
                                           submap_pose_kv.second);
   
