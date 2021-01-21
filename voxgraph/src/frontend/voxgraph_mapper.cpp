@@ -251,26 +251,34 @@ void VoxgraphMapper::pointcloudCallback(
   pointcloud_integrator_.integratePointcloud(
       pointcloud_msg, map_tracker_.get_T_S_C(),
       submap_collection_ptr_->getActiveSubmapPtr().get());
-  ROS_INFO("Integrate pointcloud");
   submap_collection_ptr_->getActiveSubmapPtr()->generateCollectionEsdf();
   const Transformation T_identity;
+  submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(T_identity.getPosition(), submap_collection_ptr_->getActiveSubmapPtr()->getEsdfMapPtr()->getEsdfLayerPtr(), submap_collection_ptr_->getActiveSubmapPtr()->getTsdfMapPtr()->getTsdfLayerPtr());
 
-  // submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(T_identity.getPosition(),
-  // map_tracker_.get_T_O_B());
-  
+  voxblox::Point current_optimized_position;
+  if (submap_collection_ptr_->getPoseHistory().size() > 1) {
+    current_optimized_position = voxblox::Point(
+        (float)submap_collection_ptr_->getPoseHistory().back().pose.position.x,
+        (float)submap_collection_ptr_->getPoseHistory().back().pose.position.y,
+        (float)submap_collection_ptr_->getPoseHistory().back().pose.position.z);
+  }else{
+    current_optimized_position =
+        voxblox::Point(map_tracker_.get_T_O_B().getPosition().x(),
+                       map_tracker_.get_T_O_B().getPosition().y(),
+                       map_tracker_.get_T_O_B().getPosition().z());
+  }
 
-  //if(optimized_flag_){
-    // submap_collection_esdf_map_ =
-    //     projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
-    // submap_collection_tsdf_map_ =
-    //     projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
-    //optimized_flag_ = false;
-  //}
+  if (optimization_finished_) {
+    submap_collection_esdf_map_ =
+        projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
+    submap_collection_tsdf_map_ =
+        projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
+    optimization_finished_ = false;
+  }
 
-  ROS_INFO("Update esdf");
   if (submap_collection_ptr_->size() > 1) {
 
-    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(map_tracker_.get_T_O_B().getPosition(), submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
+    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(current_optimized_position, submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
     projected_map_server_.updateProjectedTsdfCollection(
         submap_collection_tsdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
@@ -278,12 +286,13 @@ void VoxgraphMapper::pointcloudCallback(
         submap_collection_esdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
     
-
   } else if (submap_collection_ptr_->size() == 1) {
+    
     submap_collection_tsdf_map_ =
         projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
     submap_collection_esdf_map_ =
         projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
+    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(current_optimized_position, submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
   }
 
   // Add the current pose to the submap's pose history
@@ -568,7 +577,7 @@ int VoxgraphMapper::optimizePoseGraph() {
   submap_server_.publishSubmapPoses(submap_collection_ptr_, ros::Time::now());
 
   //ROS_WARN("Success");
-  //optimized_flag_ = true;
+  optimization_finished_ = true;
   // Report successful completion
   return 1;
 }

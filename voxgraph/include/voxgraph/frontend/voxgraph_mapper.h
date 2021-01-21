@@ -168,7 +168,8 @@ class VoxgraphMapper {
 
   // Map tracker handles the odometry input and refines it using scan-to-map ICP
   MapTracker map_tracker_;
-  //bool optimized_flag_;
+  // Flag indicating whether the posegraph optimization has finished or not
+  bool optimization_finished_;
 };
 }  // namespace voxgraph
 

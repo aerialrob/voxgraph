@@ -91,7 +91,7 @@ void VoxgraphSubmap::generateCollectionEsdf() {
 void VoxgraphSubmap::finishSubmap() {
   ROS_INFO("FinishSubmap");
   // Generate the cached the ESDF
-  generateEsdf();
+  //generateEsdf();
 
   // Generate the cached Oriented Bounded Boxes
   getSubmapFrameSubmapObb();
