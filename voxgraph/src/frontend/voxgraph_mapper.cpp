@@ -251,9 +251,19 @@ void VoxgraphMapper::pointcloudCallback(
   pointcloud_integrator_.integratePointcloud(
       pointcloud_msg, map_tracker_.get_T_S_C(),
       submap_collection_ptr_->getActiveSubmapPtr().get());
+
   submap_collection_ptr_->getActiveSubmapPtr()->generateCollectionEsdf();
+  
   const Transformation T_identity;
-  submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(T_identity.getPosition(), submap_collection_ptr_->getActiveSubmapPtr()->getEsdfMapPtr()->getEsdfLayerPtr(), submap_collection_ptr_->getActiveSubmapPtr()->getTsdfMapPtr()->getTsdfLayerPtr());
+  submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(
+      T_identity.getPosition(), map_tracker_.get_T_O_B(),
+      submap_collection_ptr_->getActiveSubmapPtr()
+          ->getEsdfMapPtr()
+          ->getEsdfLayerPtr(),
+      submap_collection_ptr_->getActiveSubmapPtr()
+          ->getTsdfMapPtr()
+          ->getTsdfLayerPtr());
+
 
   voxblox::Point current_optimized_position;
   if (submap_collection_ptr_->getPoseHistory().size() > 1) {
@@ -269,16 +279,18 @@ void VoxgraphMapper::pointcloudCallback(
   }
 
   if (optimization_finished_) {
-    submap_collection_esdf_map_ =
-        projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
-    submap_collection_tsdf_map_ =
-        projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
-    optimization_finished_ = false;
+    // submap_collection_esdf_map_ =
+    //     projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
+    // submap_collection_tsdf_map_ =
+    //     projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
+    // optimization_finished_ = false;
   }
 
   if (submap_collection_ptr_->size() > 1) {
-
-    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(current_optimized_position, submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
+    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(
+        current_optimized_position, map_tracker_.get_T_O_B(),
+        submap_collection_esdf_map_->getEsdfLayerPtr(),
+        submap_collection_tsdf_map_->getTsdfLayerPtr());
     projected_map_server_.updateProjectedTsdfCollection(
         submap_collection_tsdf_map_,
         submap_collection_ptr_->getActiveSubmapPtr().get());
@@ -292,7 +304,11 @@ void VoxgraphMapper::pointcloudCallback(
         projected_map_server_.getProjectedTsdfMap(*submap_collection_ptr_);
     submap_collection_esdf_map_ =
         projected_map_server_.getProjectedEsdfMap(*submap_collection_ptr_);
-    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(current_optimized_position, submap_collection_esdf_map_->getEsdfLayerPtr(), submap_collection_tsdf_map_->getTsdfLayerPtr());
+    submap_collection_ptr_->getActiveSubmapPtr()->updateFreeSpaceEsdf(
+        current_optimized_position, map_tracker_.get_T_O_B(),
+        submap_collection_esdf_map_->getEsdfLayerPtr(),
+        submap_collection_tsdf_map_->getTsdfLayerPtr());
+
   }
 
   // Add the current pose to the submap's pose history
